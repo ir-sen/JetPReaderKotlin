@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1067244691895",
+    "project_id": "jetreaderapp-af25d",
+    "storage_bucket": "jetreaderapp-af25d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1067244691895:android:13ff9936b1e1068865c832",
+        "android_client_info": {
+          "package_name": "kis.kan.jetreadearapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlwA5uefFnTkwnAvBpRvs0D77Mx09J0QY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
