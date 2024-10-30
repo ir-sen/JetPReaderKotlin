@@ -51,12 +51,16 @@ import kis.kan.jetreadearapp.R
 import kis.kan.jetreadearapp.components.EmailInput
 import kis.kan.jetreadearapp.components.PsswordInput
 import kis.kan.jetreadearapp.components.ReaderLogo
+import kis.kan.jetreadearapp.navigation.ReaderScreens
 
 
 const val TAG = "ReaderLoginScreenTAG"
 
 @Composable
-fun ReaderLoginScreen(navController: NavController) {
+fun ReaderLoginScreen(
+    navController: NavController,
+    viewModel: LogInScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
 
     val showLoinForm = rememberSaveable {
         mutableStateOf(true)
@@ -70,12 +74,21 @@ fun ReaderLoginScreen(navController: NavController) {
         ) {
             ReaderLogo()
             if(showLoinForm.value) UserForm(loading = false, isCreateAccount = false) { email, password ->
-                // Todo login FB account
+                viewModel.singInWithEmailAndPassword(
+                    email = email,
+                    password = password,
+                    ) {
+                    navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                }
             }
             else {
+
                 UserForm(loading = false, isCreateAccount = true) { email, password ->
-                    //Todo create FB account
+                    viewModel.createUserWithEmailAndPassword(email, password) {
+                        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                    }
                 }
+
             }
 
         }
