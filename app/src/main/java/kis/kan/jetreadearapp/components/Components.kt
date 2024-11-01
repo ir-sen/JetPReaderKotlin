@@ -1,23 +1,34 @@
 package kis.kan.jetreadearapp.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import kis.kan.jetreadearapp.model.MBook
 import kis.kan.jetreadearapp.screens.login.PasswordVisibility
 
 @Composable
@@ -125,4 +136,46 @@ fun PsswordInput(
         keyboardActions = onAction,
 
         )
+}
+
+
+@Composable
+fun TitleSection(modifier: Modifier = Modifier, lable: String) {
+    Surface(modifier = modifier
+        .padding(start = 5.dp, top = 1.dp),
+    ) {
+        Column() {
+            Text(text = lable,
+                fontSize = 19.sp,
+                fontStyle = FontStyle.Normal,
+                textAlign = TextAlign.Left,
+            )
+        }
+
+    }
+}
+
+@Composable
+fun ReadingRightNowArea(
+    books: List<MBook>,
+    navController: NavController,
+) {
+
+}
+
+
+@Composable
+fun FABContent(onTap: (String) -> Unit) {
+
+    FloatingActionButton(
+        onClick = { onTap("") },
+        shape = RoundedCornerShape(50.dp),
+        containerColor = Color(0xFF92CBDF)
+
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add, contentDescription = "Add button ",
+            tint = Color.White
+        )
+    }
 }

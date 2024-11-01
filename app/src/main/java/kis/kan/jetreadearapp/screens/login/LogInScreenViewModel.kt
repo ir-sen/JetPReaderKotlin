@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kis.kan.jetreadearapp.model.MUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -29,7 +30,6 @@ class LogInScreenViewModel : ViewModel() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
-                        //TODO("take theme home")
                         home()
                         Log.d(TAG, "singIN succsess yeas: ${it.result}")
                     } else {
@@ -69,9 +69,15 @@ class LogInScreenViewModel : ViewModel() {
 
     private fun createUser(displayName: String?) {
         val userId = auth.currentUser?.uid
-        val user = mutableMapOf<String, Any>()
-        user["user_id"] = userId.toString()
-        user["display_name"] = displayName.toString()
+//        val user = mutableMapOf<String, Any>()
+        val user = MUser(
+            userId = userId.toString(),
+            displayName = displayName.toString(),
+            avatarUrl = "",
+            quote = "Life is great",
+            profession = "Android Developer",
+            id = null,
+        ).toMap()
 
         FirebaseFirestore.getInstance().collection("users")
             .add(user)

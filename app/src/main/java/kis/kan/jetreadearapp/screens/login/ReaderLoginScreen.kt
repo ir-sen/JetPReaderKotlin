@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -23,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,15 +35,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kis.kan.jetreadearapp.R
 import kis.kan.jetreadearapp.components.EmailInput
@@ -83,7 +75,9 @@ fun ReaderLoginScreen(
             }
             else {
 
+
                 UserForm(loading = false, isCreateAccount = true) { email, password ->
+                    Log.d(TAG, "Create form ok $email $password")
                     viewModel.createUserWithEmailAndPassword(email, password) {
                         navController.navigate(ReaderScreens.ReaderHomeScreen.name)
                     }
@@ -179,6 +173,7 @@ fun UserForm(
             loading = loading,
             validInputs = valid,
         ) {
+            Log.d(TAG, "Click ok $email $password")
             onDone(email.value.trim(), password.value.trim())
             keyboardController?.hide()
         }
