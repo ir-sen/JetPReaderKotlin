@@ -1,14 +1,18 @@
 package kis.kan.jetreadearapp.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
@@ -40,7 +44,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kis.kan.jetreadearapp.components.FABContent
+import kis.kan.jetreadearapp.components.ListCard
 import kis.kan.jetreadearapp.components.TitleSection
+import kis.kan.jetreadearapp.model.MBook
 import kis.kan.jetreadearapp.navigation.ReaderScreens
 
 
@@ -97,19 +103,19 @@ fun ReaderAppBar(
             }
         },
         actions = {
-                  IconButton(onClick = {
-                      FirebaseAuth.getInstance().signOut().run {
-                          navController.navigate(ReaderScreens.LoginScreen.name)
-                      }
-                  }) {
-                      Icon(
-                          imageVector = Icons.Default.ExitToApp,
-                          contentDescription = "logout icon",
-                          tint = Color.Green.copy(alpha = 0.4f)
-                          )
+            IconButton(onClick = {
+                FirebaseAuth.getInstance().signOut().run {
+                    navController.navigate(ReaderScreens.LoginScreen.name)
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "logout icon",
+                    tint = Color.Green.copy(alpha = 0.4f)
+                )
 
 
-                  }
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
@@ -119,32 +125,39 @@ fun ReaderAppBar(
 }
 
 
-
-
-
 @Preview
 @Composable
 fun HomeContent(navController: NavController = NavController(LocalContext.current)) {
 
+    val listOfBooks = listOf(
+        MBook(id = "dakd2j", title = "Hello Again", authors = "All of us", notes = null),
+        MBook(id = "dak3dj", title = "Hello Again1", authors = "All of us", notes = null),
+        MBook(id = "dakd4j", title = "Hello Again2", authors = "All of us", notes = null),
+        MBook(id = "dakd5j", title = "Hello Again3", authors = "All of us", notes = null),
+        MBook(id = "dakdj", title = "Hello Again4", authors = "All of us", notes = null),
+    )
+
     val email = FirebaseAuth.getInstance().currentUser?.email
     val currentUserName = if (email?.isNotEmpty() == true)
         FirebaseAuth.getInstance().currentUser?.email.toString().split("@").get(0)
-        else "N/A"
+    else "N/A"
 
 
-    Column(Modifier.padding(2.dp),
-        verticalArrangement = Arrangement.Top) {
-        Row(modifier = Modifier.align(Alignment.Start), ){
-            
+    Column(
+        Modifier.padding(2.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Row(modifier = Modifier.align(Alignment.Start)) {
+
             TitleSection(lable = "Your reading \n " + " activity right now")
-            
-            
+
+
             Spacer(modifier = Modifier.fillMaxWidth(0.7f))
 
             Column {
                 Icon(Icons.Default.AccountCircle, contentDescription = "Account Icon",
                     modifier = Modifier
-                        .clickable{
+                        .clickable {
                             navController.navigate(ReaderScreens.ReaderStatsScreen.name)
                         }
                 )
@@ -157,15 +170,61 @@ fun HomeContent(navController: NavController = NavController(LocalContext.curren
                     fontSize = 15.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Clip,
-                     )
+                )
                 HorizontalDivider()
-
             }
-
         }
+
+        ReadingRightNowArea(
+            books = listOf(),
+            navController = navController
+        )
+
+        TitleSection(lable = "Reading list")
+
+        BookListArea(listOfBooks = listOfBooks, navController = navController)
 
     }
 }
+
+@Composable
+fun BookListArea(listOfBooks: List<MBook>, navController: NavController) {
+
+    HorizontalScrollableComponent(listOfBooks) {
+        Log.d("tagForCheck", "clicked $it")
+        //TODO: on click go to details
+    }
+
+}
+
+@Composable
+fun HorizontalScrollableComponent(listOfBooks: List<MBook>, onCardPressed: (String) -> Unit) {
+    val scrollState = rememberScrollState()
+
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .heightIn(280.dp)
+            .horizontalScroll(scrollState)
+    ) {
+        for (book in listOfBooks) {
+            ListCard(book) {
+                onCardPressed(it)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ReadingRightNowArea(books: List<MBook>,
+                        navController: NavController) {
+    ListCard()
+
+}
+
+
+
+
 
 
 
