@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +46,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kis.kan.jetreadearapp.components.FABContent
 import kis.kan.jetreadearapp.components.ListCard
+import kis.kan.jetreadearapp.components.ReaderAppBar
 import kis.kan.jetreadearapp.components.TitleSection
 import kis.kan.jetreadearapp.model.MBook
 import kis.kan.jetreadearapp.navigation.ReaderScreens
@@ -57,7 +59,7 @@ fun ReaderHomeScreen(navController: NavController) {
     },
         floatingActionButton = {
             FABContent {
-
+                navController.navigate(ReaderScreens.SearchScreen.name)
             }
         }) { paddingValue ->
         Surface(
@@ -70,59 +72,7 @@ fun ReaderHomeScreen(navController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ReaderAppBar(
-    title: String,
-    showProfile: Boolean = true,
-    navController: NavController,
-) {
 
-    TopAppBar(
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (showProfile) {
-                    Icon(
-                        imageVector = Icons.Default.AccountBox,
-                        contentDescription = "Icons Bar title",
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .scale(0.9f),
-
-                        )
-                }
-                Text(
-                    text = title,
-                    color = Color.Red.copy(alpha = 0.7f),
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold, fontSize = 20.sp
-                    ),
-                )
-                Spacer(modifier = Modifier.width(150.dp))
-
-            }
-        },
-        actions = {
-            IconButton(onClick = {
-                FirebaseAuth.getInstance().signOut().run {
-                    navController.navigate(ReaderScreens.LoginScreen.name)
-                }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.ExitToApp,
-                    contentDescription = "logout icon",
-                    tint = Color.Green.copy(alpha = 0.4f)
-                )
-
-
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
-    )
-}
 
 
 @Preview

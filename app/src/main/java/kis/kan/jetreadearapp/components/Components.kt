@@ -17,23 +17,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -48,7 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import kis.kan.jetreadearapp.model.MBook
+import kis.kan.jetreadearapp.navigation.ReaderScreens
 import kis.kan.jetreadearapp.screens.login.PasswordVisibility
 
 @Composable
@@ -381,4 +391,82 @@ fun RoundedButton(
 
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReaderAppBar(
+    title: String,
+    icon: ImageVector? = null,
+    showProfile: Boolean = true,
+    navController: NavController,
+    onBackArrowClicked: () -> Unit = {},
+) {
+
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showProfile) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Icons Bar title",
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .scale(0.9f),
+
+                        )
+                }
+
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "arrow back",
+                        tint = Color.Red.copy(alpha = 0.7f),
+                        modifier = Modifier.clickable {
+                            onBackArrowClicked.invoke()
+                        },
+                        )
+
+                }
+
+                Spacer(modifier = Modifier.width(40.dp))
+
+                Text(
+                    text = title,
+                    color = Color.Red.copy(alpha = 0.7f),
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold, fontSize = 20.sp
+                    ),
+                )
+                Spacer(modifier = Modifier.width(150.dp))
+
+
+
+            }
+        },
+        actions = {
+            if (showProfile) Row() {
+                IconButton(onClick = {
+                    FirebaseAuth.getInstance().signOut().run {
+                        navController.navigate(ReaderScreens.LoginScreen.name)
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "logout icon",
+                        tint = Color.Green.copy(alpha = 0.4f)
+                    )
+
+
+                }
+            } else {
+
+            }
+            
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+        ),
+    )
 }
