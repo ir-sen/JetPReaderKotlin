@@ -36,6 +36,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
 import kis.kan.jetreadearapp.components.InputField
@@ -45,9 +47,12 @@ import kis.kan.jetreadearapp.navigation.ReaderScreens
 
 
 private val TAG = "ReaderBookSearchScreenTAG"
-@Preview
+
 @Composable
-fun ReaderBookSearchScreen(navController: NavController = NavController(LocalContext.current)) {
+fun ReaderBookSearchScreen(
+    navController: NavController,
+    viewModel: BookSearchViewModel = hiltViewModel()
+) {
     Scaffold(topBar = {ReaderAppBar(
         title = "Search books",
         navController = navController,
@@ -60,13 +65,18 @@ fun ReaderBookSearchScreen(navController: NavController = NavController(LocalCon
     }) {paddingValues ->
         paddingValues
         Column(modifier = Modifier.padding(paddingValues)) {
-            SearchForm(modifier = Modifier.fillMaxWidth()
-                .padding(paddingValues)) {
-                Log.d(TAG, "SearchForm: $it")
+            SearchForm(modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingValues),
+                viewModel = viewModel) { query ->
+
+                    viewModel.searchBooks(query)
+
+                    Log.d(TAG, "SearchForm: ${viewModel.listOfBooks.value.data}")
             }
 
             Spacer(modifier = Modifier.height(13.dp))
-            BookList(navController)
+            BookList(navController, viewModel)
 
         }
 
@@ -75,7 +85,10 @@ fun ReaderBookSearchScreen(navController: NavController = NavController(LocalCon
 }
 
 @Composable
-fun BookList(navController: NavController) {
+fun BookList(navController: NavController, viewModel: BookSearchViewModel) {
+
+
+    Log.d("lqwer", "BookList: ${viewModel.listOfBooks.value.data}")
 
 
     val listOfBooks = listOf(
@@ -101,9 +114,10 @@ fun BookList(navController: NavController) {
 @Composable
 fun BookRow(book: MBook, navController: NavController) {
 
-    Card(modifier = Modifier.clickable {
+    Card(modifier = Modifier
+        .clickable {
 
-    }
+        }
         .fillMaxWidth()
         .height(100.dp)
         .padding(3.dp),
@@ -117,8 +131,10 @@ fun BookRow(book: MBook, navController: NavController) {
             Image(
                 painter = rememberAsyncImagePainter(model = urlImage),
                 contentDescription = "book image",
-                modifier = Modifier.width(80.dp)
-                    .fillMaxHeight().padding(end = 4.dp)
+                modifier = Modifier
+                    .width(80.dp)
+                    .fillMaxHeight()
+                    .padding(end = 4.dp)
             )
 
 
@@ -136,6 +152,7 @@ fun BookRow(book: MBook, navController: NavController) {
 @Composable
 fun SearchForm(
     modifier: Modifier,
+    viewModel: BookSearchViewModel,
     loading: Boolean = false,
     hint: String = "Search",
     onSearch: (String) -> Unit = {},
@@ -146,9 +163,11 @@ fun SearchForm(
         val valid = remember(searchQueryState.value) {
             searchQueryState.value.trim().isNotEmpty()
         }
+        viewModel.searchBooks(searchQueryState.value.trim())
 
         InputField(valueState = searchQueryState, labelId = "Search", enabled = true,
             onAction = KeyboardActions {
+
                 if(!valid) return@KeyboardActions
                 onSearch(searchQueryState.value.trim())
                 searchQueryState.value = ""
