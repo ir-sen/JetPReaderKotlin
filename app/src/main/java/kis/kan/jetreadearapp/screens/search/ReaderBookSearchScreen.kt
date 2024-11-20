@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -85,10 +86,15 @@ fun ReaderBookSearchScreen(
 }
 
 @Composable
-fun BookList(navController: NavController, viewModel: BookSearchViewModel) {
+fun BookList(navController: NavController, viewModel: BookSearchViewModel = hiltViewModel()) {
 
 
-    Log.d("lqwer", "BookList: ${viewModel.listOfBooks.value.data}")
+    if (viewModel.listOfBooks.value.loading == true) {
+        Log.d("lqwer", "book loading")
+        CircularProgressIndicator()
+    } else {
+        Log.d("lqwer", "BookList: ${viewModel.listOfBooks.value.data}")
+    }
 
 
     val listOfBooks = listOf(

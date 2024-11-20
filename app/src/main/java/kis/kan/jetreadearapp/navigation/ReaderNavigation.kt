@@ -1,6 +1,7 @@
 package kis.kan.jetreadearapp.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -8,6 +9,7 @@ import kis.kan.jetreadearapp.screens.ReaderSplashScreen
 import kis.kan.jetreadearapp.screens.details.BookDetailsScreen
 import kis.kan.jetreadearapp.screens.home.ReaderHomeScreen
 import kis.kan.jetreadearapp.screens.login.ReaderLoginScreen
+import kis.kan.jetreadearapp.screens.search.BookSearchViewModel
 import kis.kan.jetreadearapp.screens.search.ReaderBookSearchScreen
 import kis.kan.jetreadearapp.screens.starts.ReaderStartsScreen
 
@@ -34,7 +36,9 @@ fun ReaderNavigation() {
         }
 
         composable(ReaderScreens.SearchScreen.name) {
-            ReaderBookSearchScreen(navController = navController)
+            val searchViewModel = hiltViewModel<BookSearchViewModel>()
+
+            ReaderBookSearchScreen(navController = navController, viewModel = searchViewModel)
         }
 
         composable(ReaderScreens.LoginScreen.name) {
