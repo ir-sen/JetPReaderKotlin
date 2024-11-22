@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -85,9 +86,23 @@ fun ReaderBookSearchScreen(
 
 @Composable
 fun BookList(navController: NavController, viewModel: SearchViewModelVersion2 = hiltViewModel()) {
-
-
     val listOfBooks = viewModel.list
+    if (viewModel.loading) {
+        LinearProgressIndicator()
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            items(items = listOfBooks) { book ->
+                BookRow(book, navController)
+            }
+
+
+        }
+    }
+
+
 //        listOf(
 //        MBook(id = "dakd2j", title = "Hello Again", authors = "All of us", notes = null),
 //        MBook(id = "dak3dj", title = "Hello Again1", authors = "All of us", notes = null),
@@ -96,16 +111,7 @@ fun BookList(navController: NavController, viewModel: SearchViewModelVersion2 = 
 //        MBook(id = "dakdj", title = "Hello Again4", authors = "All of us", notes = null),
 //    )
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        items(items = listOfBooks) { book ->
-            BookRow(book, navController)
-        }
 
-
-    }
 
 }
 

@@ -17,7 +17,11 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModelVersion2 @Inject constructor(private val repository: BookRepositoryVer2): ViewModel() {
 
+
     var list: List<Item> by mutableStateOf(listOf())
+    var loading: Boolean by mutableStateOf(true)
+
+
     private val TAG = "SearchViewModelVersion2TAG"
 
 
@@ -32,7 +36,6 @@ class SearchViewModelVersion2 @Inject constructor(private val repository: BookRe
     fun searchBooks(query: String) {
         viewModelScope.launch(Dispatchers.Default) {
 
-
             if (query.isEmpty()) {
                 return@launch
             }
@@ -42,20 +45,23 @@ class SearchViewModelVersion2 @Inject constructor(private val repository: BookRe
 
                     is Resource.Error -> {
                         Log.d(TAG, "searchBooks: Failed getting books")
+                        loading = false
                     }
 
                     is Resource.Success -> {
                         list = response.data!!
+                        if (list.isNotEmpty()) loading = false
                     }
 
                     else -> {
-
+                        loading = false
                     }
 
                 }
 
             } catch (e: Exception) {
                 Log.d(TAG, "searchbooks: ${e.message.toString()}")
+                loading = false
             }
         }
     }
