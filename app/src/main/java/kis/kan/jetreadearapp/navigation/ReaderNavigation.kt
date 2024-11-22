@@ -11,6 +11,7 @@ import kis.kan.jetreadearapp.screens.home.ReaderHomeScreen
 import kis.kan.jetreadearapp.screens.login.ReaderLoginScreen
 import kis.kan.jetreadearapp.screens.search.BookSearchViewModel
 import kis.kan.jetreadearapp.screens.search.ReaderBookSearchScreen
+import kis.kan.jetreadearapp.screens.search.SearchViewModelVersion2
 import kis.kan.jetreadearapp.screens.starts.ReaderStartsScreen
 
 
@@ -36,7 +37,7 @@ fun ReaderNavigation() {
         }
 
         composable(ReaderScreens.SearchScreen.name) {
-            val searchViewModel = hiltViewModel<BookSearchViewModel>()
+            val searchViewModel = hiltViewModel<SearchViewModelVersion2>()
 
             ReaderBookSearchScreen(navController = navController, viewModel = searchViewModel)
         }

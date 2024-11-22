@@ -20,8 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,18 +30,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
 import kis.kan.jetreadearapp.components.InputField
 import kis.kan.jetreadearapp.components.ReaderAppBar
-import kis.kan.jetreadearapp.model.MBook
+import kis.kan.jetreadearapp.model.Item
 import kis.kan.jetreadearapp.navigation.ReaderScreens
 
 
@@ -52,28 +47,31 @@ private val TAG = "ReaderBookSearchScreenTAG"
 @Composable
 fun ReaderBookSearchScreen(
     navController: NavController,
-    viewModel: BookSearchViewModel = hiltViewModel()
+    viewModel: SearchViewModelVersion2 = hiltViewModel()
 ) {
-    Scaffold(topBar = {ReaderAppBar(
-        title = "Search books",
-        navController = navController,
-        icon = Icons.AutoMirrored.Filled.ArrowBack,
-        showProfile = false,
+    Scaffold(topBar = {
+        ReaderAppBar(
+            title = "Search books",
+            navController = navController,
+            icon = Icons.AutoMirrored.Filled.ArrowBack,
+            showProfile = false,
         ) {
-        // if we click on button back
-        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
-    }
-    }) {paddingValues ->
+            // if we click on button back
+            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+        }
+    }) { paddingValues ->
         paddingValues
         Column(modifier = Modifier.padding(paddingValues)) {
-            SearchForm(modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues),
-                viewModel = viewModel) { query ->
+            SearchForm(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues),
+                viewModel = viewModel
+            ) { query ->
 
-                    viewModel.searchBooks(query)
+                viewModel.searchBooks(query)
 
-                    Log.d(TAG, "SearchForm: ${viewModel.listOfBooks.value.data}")
+                Log.d(TAG, "SearchForm: ${viewModel.list}")
             }
 
             Spacer(modifier = Modifier.height(13.dp))
@@ -86,26 +84,20 @@ fun ReaderBookSearchScreen(
 }
 
 @Composable
-fun BookList(navController: NavController, viewModel: BookSearchViewModel = hiltViewModel()) {
+fun BookList(navController: NavController, viewModel: SearchViewModelVersion2 = hiltViewModel()) {
 
 
-    if (viewModel.listOfBooks.value.loading == true) {
-        Log.d("lqwer", "book loading")
-        CircularProgressIndicator()
-    } else {
-        Log.d("lqwer", "BookList: ${viewModel.listOfBooks.value.data}")
-    }
+    val listOfBooks = viewModel.list
+//        listOf(
+//        MBook(id = "dakd2j", title = "Hello Again", authors = "All of us", notes = null),
+//        MBook(id = "dak3dj", title = "Hello Again1", authors = "All of us", notes = null),
+//        MBook(id = "dakd4j", title = "Hello Again2", authors = "All of us", notes = null),
+//        MBook(id = "dakd5j", title = "Hello Again3", authors = "All of us", notes = null),
+//        MBook(id = "dakdj", title = "Hello Again4", authors = "All of us", notes = null),
+//    )
 
-
-    val listOfBooks = listOf(
-        MBook(id = "dakd2j", title = "Hello Again", authors = "All of us", notes = null),
-        MBook(id = "dak3dj", title = "Hello Again1", authors = "All of us", notes = null),
-        MBook(id = "dakd4j", title = "Hello Again2", authors = "All of us", notes = null),
-        MBook(id = "dakd5j", title = "Hello Again3", authors = "All of us", notes = null),
-        MBook(id = "dakdj", title = "Hello Again4", authors = "All of us", notes = null),
-    )
-
-    LazyColumn(modifier = Modifier.fillMaxSize(),
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
         items(items = listOfBooks) { book ->
@@ -118,22 +110,41 @@ fun BookList(navController: NavController, viewModel: BookSearchViewModel = hilt
 }
 
 @Composable
-fun BookRow(book: MBook, navController: NavController) {
+fun BookRow(
+    book: Item,
+    navController: NavController
+) {
 
-    Card(modifier = Modifier
-        .clickable {
+    Card(
+        modifier = Modifier
+            .clickable {
 
-        }
-        .fillMaxWidth()
-        .height(100.dp)
-        .padding(3.dp),
+            }
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(3.dp),
         shape = RectangleShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
     ) {
-        Row(modifier = Modifier.padding(5.dp),
-            verticalAlignment = Alignment.Top) {
+        Row(
+            modifier = Modifier.padding(5.dp),
+            verticalAlignment = Alignment.Top
+        ) {
 
-            val urlImage = "http://books.google.com/books/content?id=f_DuEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+
+//            val urlImage: String = book.volumeInfo.imageLinks.smallThumbnail.ifEmpty { "http://books.google.com/books/content?id=f_DuEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api" }
+
+
+            val urlImage: String = if (book.volumeInfo.imageLinks?.smallThumbnail.isNullOrEmpty()) {
+                "https://books.google.com/books/content?id=f_DuEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+            } else {
+                book.volumeInfo.imageLinks!!.smallThumbnail
+            }
+
+
+//            val urlImage: String = book.volumeInfo.imageLinks.smallThumbnail ?: "http://books.google.com/books/content?id=f_DuEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+
+
             Image(
                 painter = rememberAsyncImagePainter(model = urlImage),
                 contentDescription = "book image",
@@ -144,10 +155,12 @@ fun BookRow(book: MBook, navController: NavController) {
             )
 
 
-            Column( ) {
-                Text(text = book.title.toString(), overflow = TextOverflow.Ellipsis,)
-                Text(text = "Author: ${book.authors}", overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium)
+            Column() {
+                Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = "Author: ${book.volumeInfo.authors}", overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
+                )
                 // TODO  : all more fields later !
             }
 
@@ -158,7 +171,7 @@ fun BookRow(book: MBook, navController: NavController) {
 @Composable
 fun SearchForm(
     modifier: Modifier,
-    viewModel: BookSearchViewModel,
+    viewModel: SearchViewModelVersion2,
     loading: Boolean = false,
     hint: String = "Search",
     onSearch: (String) -> Unit = {},
@@ -169,12 +182,13 @@ fun SearchForm(
         val valid = remember(searchQueryState.value) {
             searchQueryState.value.trim().isNotEmpty()
         }
-        viewModel.searchBooks(searchQueryState.value.trim())
+
+
 
         InputField(valueState = searchQueryState, labelId = "Search", enabled = true,
             onAction = KeyboardActions {
 
-                if(!valid) return@KeyboardActions
+                if (!valid) return@KeyboardActions
                 onSearch(searchQueryState.value.trim())
                 searchQueryState.value = ""
                 keyboardController?.hide()
