@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kis.kan.jetreadearapp.network.BooksApi
 import kis.kan.jetreadearapp.repository.BookRepository
+import kis.kan.jetreadearapp.repository.BookRepositoryVer2
 import kis.kan.jetreadearapp.utils.Constance
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,6 +22,10 @@ object AppModule {
     @Singleton
     @Provides
     fun provideBookRepository(api: BooksApi) = BookRepository(api)
+
+    @Singleton
+    @Provides
+    fun provideBookRepositoryVer2(api: BooksApi) = BookRepositoryVer2(api)
 
 
     // add module for loading from network api

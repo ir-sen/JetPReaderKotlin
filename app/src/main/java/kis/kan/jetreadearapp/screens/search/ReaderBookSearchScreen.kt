@@ -3,6 +3,7 @@ package kis.kan.jetreadearapp.screens.search
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -87,8 +89,15 @@ fun ReaderBookSearchScreen(
 @Composable
 fun BookList(navController: NavController, viewModel: SearchViewModelVersion2 = hiltViewModel()) {
     val listOfBooks = viewModel.list
+
     if (viewModel.loading) {
-        LinearProgressIndicator()
+        Row(modifier = Modifier.padding(end = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+            ) {
+            LinearProgressIndicator()
+            Text(text = "Loading...")
+        }
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -124,16 +133,17 @@ fun BookRow(
     Card(
         modifier = Modifier
             .clickable {
+                navController.navigate(ReaderScreens.DetailsScreen.name + "/${book.id}")
 
             }
             .fillMaxWidth()
-            .height(100.dp)
-            .padding(3.dp),
+            .height(130.dp)
+            .padding(8.dp),
         shape = RectangleShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
     ) {
         Row(
-            modifier = Modifier.padding(5.dp),
+            modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.Top
         ) {
 
@@ -165,9 +175,18 @@ fun BookRow(
                 Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
                 Text(
                     text = "Author: ${book.volumeInfo.authors}", overflow = TextOverflow.Ellipsis,
+                    fontStyle = FontStyle.Italic,
                     style = MaterialTheme.typography.titleMedium
                 )
-                // TODO  : all more fields later !
+
+                Text(
+                    text = "${book.volumeInfo.categories}", overflow = TextOverflow.Ellipsis,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+
+
             }
 
         }
