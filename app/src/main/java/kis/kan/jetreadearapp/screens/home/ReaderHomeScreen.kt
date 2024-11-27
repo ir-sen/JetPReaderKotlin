@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kis.kan.jetreadearapp.components.FABContent
@@ -51,9 +52,13 @@ import kis.kan.jetreadearapp.components.TitleSection
 import kis.kan.jetreadearapp.model.MBook
 import kis.kan.jetreadearapp.navigation.ReaderScreens
 
-
+private val TAG = "ReaderHomeScreenTAG"
 @Composable
-fun ReaderHomeScreen(navController: NavController) {
+fun ReaderHomeScreen(
+    navController: NavController,
+    viewModel: HomeScreenViewModel = hiltViewModel()
+) {
+
     Scaffold(topBar = {
         ReaderAppBar(title = "Reader home screen", navController = navController)
     },
@@ -67,25 +72,34 @@ fun ReaderHomeScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(paddingValue)
         ) {
-            HomeContent(navController = navController)
+            HomeContent(navController = navController, viewModel)
         }
     }
 }
 
 
 
-
-@Preview
 @Composable
-fun HomeContent(navController: NavController = NavController(LocalContext.current)) {
+fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel = hiltViewModel()) {
 
-    val listOfBooks = listOf(
-        MBook(id = "dakd2j", title = "Hello Again", authors = "All of us", notes = null),
-        MBook(id = "dak3dj", title = "Hello Again1", authors = "All of us", notes = null),
-        MBook(id = "dakd4j", title = "Hello Again2", authors = "All of us", notes = null),
-        MBook(id = "dakd5j", title = "Hello Again3", authors = "All of us", notes = null),
-        MBook(id = "dakdj", title = "Hello Again4", authors = "All of us", notes = null),
-    )
+    var listOfBooks = emptyList<MBook>()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    if (!viewModel.data.value.data.isNullOrEmpty()) {
+        listOfBooks = viewModel.data.value.data!!.toList().filter { mBook ->
+            mBook.userId == currentUser?.uid.toString()
+        }
+
+        Log.d(TAG, "HomeContent: ${listOfBooks.toString()}")
+    }
+
+//    val listOfBooks = listOf(
+//        MBook(id = "dakd2j", title = "Hello Again", authors = "All of us", notes = null),
+//        MBook(id = "dak3dj", title = "Hello Again1", authors = "All of us", notes = null),
+//        MBook(id = "dakd4j", title = "Hello Again2", authors = "All of us", notes = null),
+//        MBook(id = "dakd5j", title = "Hello Again3", authors = "All of us", notes = null),
+//        MBook(id = "dakdj", title = "Hello Again4", authors = "All of us", notes = null),
+//    )
 
     val email = FirebaseAuth.getInstance().currentUser?.email
     val currentUserName = if (email?.isNotEmpty() == true)
@@ -142,7 +156,6 @@ fun BookListArea(listOfBooks: List<MBook>, navController: NavController) {
 
     HorizontalScrollableComponent(listOfBooks) {
         Log.d("tagForCheck", "clicked $it")
-        //TODO: on click go to details
     }
 
 }
@@ -152,7 +165,8 @@ fun HorizontalScrollableComponent(listOfBooks: List<MBook>, onCardPressed: (Stri
     val scrollState = rememberScrollState()
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .heightIn(280.dp)
             .horizontalScroll(scrollState)
     ) {

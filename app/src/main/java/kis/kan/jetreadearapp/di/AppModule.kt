@@ -1,5 +1,6 @@
 package kis.kan.jetreadearapp.di
 
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -7,6 +8,7 @@ import dagger.hilt.components.SingletonComponent
 import kis.kan.jetreadearapp.network.BooksApi
 import kis.kan.jetreadearapp.repository.BookRepository
 import kis.kan.jetreadearapp.repository.BookRepositoryVer2
+import kis.kan.jetreadearapp.repository.FireRepository
 import kis.kan.jetreadearapp.utils.Constance
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -16,6 +18,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+
+    @Singleton
+    @Provides
+    fun providerFireBookRepository() =
+        FireRepository(queryBook = FirebaseFirestore.getInstance()
+            .collection("books"))
 
 
     // this for injection api to repository
