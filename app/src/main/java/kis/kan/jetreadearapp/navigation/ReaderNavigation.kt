@@ -12,10 +12,10 @@ import kis.kan.jetreadearapp.screens.details.BookDetailsScreen
 import kis.kan.jetreadearapp.screens.home.HomeScreenViewModel
 import kis.kan.jetreadearapp.screens.home.ReaderHomeScreen
 import kis.kan.jetreadearapp.screens.login.ReaderLoginScreen
-import kis.kan.jetreadearapp.screens.search.BookSearchViewModel
 import kis.kan.jetreadearapp.screens.search.ReaderBookSearchScreen
 import kis.kan.jetreadearapp.screens.search.SearchViewModelVersion2
 import kis.kan.jetreadearapp.screens.starts.ReaderStartsScreen
+import kis.kan.jetreadearapp.screens.update.BookUpdateScreen
 
 
 @Composable
@@ -64,6 +64,18 @@ fun ReaderNavigation() {
             backStackEntry.arguments?.getString("bookId").let {
                 BookDetailsScreen(navController = navController, bookId = it.toString())
             }
+        }
+
+        val updateName = ReaderScreens.UpdateScreen.name
+        composable("$updateName/{bookItemId}",
+            arguments = listOf(navArgument("bookItemId") {
+                type = NavType.StringType
+            } )) {
+            
+            navBackStackEntry ->
+                navBackStackEntry.arguments?.getString("bookItemId").let {
+                    BookUpdateScreen(navController = navController, bookItemId = it.toString())
+                }
         }
 
     }

@@ -1,6 +1,7 @@
 package kis.kan.jetreadearapp.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -94,7 +96,11 @@ fun EmailInput(
 
 @Composable
 fun InputField(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+        .height(140.dp)
+        .padding(3.dp)
+        .background(Color.White, shape = CircleShape)
+        .padding(horizontal = 20.dp, vertical = 12.dp),
     valueState: MutableState<String>,
     labelId: String,
     enabled: Boolean,
@@ -243,12 +249,7 @@ fun BookRating(score: Double = 4.5) {
 
 @Composable
 fun ListCard(
-    book: MBook = MBook(
-        "asd13",
-        "RunForLife",
-        "LotusCloser",
-        "this is importent",
-    ),
+    book: MBook,
     onPressedDetails: (String) -> Unit = {},
 ) {
 
@@ -261,7 +262,7 @@ fun ListCard(
 
     val spacer = 10.dp
 
-    val testImageUrl = "http://books.google.com/books/content?id=f_DuEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+    val testImageUrl = book.photoUrl.toString()
 
 
 
