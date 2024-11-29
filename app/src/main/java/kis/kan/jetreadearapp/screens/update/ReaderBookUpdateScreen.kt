@@ -41,8 +41,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
+import com.google.firebase.Timestamp
 import kis.kan.jetreadearapp.components.InputField
+import kis.kan.jetreadearapp.components.RatingBarOwn
 import kis.kan.jetreadearapp.components.ReaderAppBar
+import kis.kan.jetreadearapp.components.RoundedButton
 import kis.kan.jetreadearapp.data.DataOrException
 import kis.kan.jetreadearapp.model.MBook
 import kis.kan.jetreadearapp.screens.home.HomeScreenViewModel
@@ -135,6 +138,10 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
         mutableStateOf(false)
     }
 
+    val ratingVal = remember {
+        mutableStateOf(0)
+    }
+
 
     // check if we have notes and sent it in default value
     SimpleForm(
@@ -187,6 +194,61 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                 Text(text = "Finished on: ${book.finishReading}")
             }
         }
+
+
+    }
+
+    Text(text = "Rating", modifier = Modifier.padding(bottom = 3.dp))
+
+    book.rating?.toInt().let {
+//        RatingBarOwn
+        RatingBarOwn(rating = it!!) { rating ->
+            ratingVal.value = rating
+        }
+    }
+
+    Spacer(modifier = Modifier.padding(15.dp))
+
+    val changeNotes = book.notes != notesText.value
+    val changeRating = book.rating?.toInt() != ratingVal.value
+
+    val isFinishedTimeStamp = if (isFinishedReading.value) Timestamp.now()
+    else book.finishReading
+
+    val isStartedTimeStamp = if (isStartedReading.value) Timestamp.now()
+    else book.startedReading
+
+    val bookUpdate = changeNotes ||
+            changeRating ||
+            isStartedReading.value ||
+            isFinishedReading.value
+
+
+    val bookToUpdate = hashMapOf(
+        "finished_reading_at" to isFinishedTimeStamp,
+        "started_reading at" to  isStartedReading,
+        "rating" to ratingVal.value,
+        "notes" to notesText.value,
+    ).toMap()
+
+
+    Row {
+        RoundedButton(
+            label = "Update"
+        ) {
+
+
+        }
+
+        Spacer(modifier = Modifier.width(100.dp))
+
+        RoundedButton(
+            "Delete"
+        ) {
+
+        }
+
+
     }
 
 
