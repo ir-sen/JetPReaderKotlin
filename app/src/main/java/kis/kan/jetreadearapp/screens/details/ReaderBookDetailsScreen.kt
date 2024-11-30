@@ -1,7 +1,6 @@
 package kis.kan.jetreadearapp.screens.details
 
 import android.util.Log
-import android.widget.Space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -24,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,21 +48,22 @@ import kis.kan.jetreadearapp.navigation.ReaderScreens
 
 
 private val TAG = "BookDetailsScreenTAG"
+
 @Composable
 fun BookDetailsScreen(
     navController: NavController,
     bookId: String,
     viewModel: DetailsScreenViewModel = hiltViewModel()
-    ) {
+) {
 
     Scaffold(
         topBar = {
             ReaderAppBar(
                 title = "BookDerails",
                 icon = Icons.Default.ArrowBack,
-                navController =navController,
+                navController = navController,
 
-            ) {
+                ) {
                 navController.navigate(ReaderScreens.SearchScreen.name)
             }
 
@@ -71,13 +72,17 @@ fun BookDetailsScreen(
     ) { pad ->
         pad
 
-        Surface(modifier = Modifier
-            .padding(pad)
-            .fillMaxSize()) {
+        Surface(
+            modifier = Modifier
+                .padding(pad)
+                .fillMaxSize()
+        ) {
 
-            Column(modifier = Modifier.padding(top = 12.dp),
+            Column(
+                modifier = Modifier.padding(top = 12.dp),
                 verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally) {
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
 
                 val bookInfo = produceState<Resource<Item>>(initialValue = Resource.Loading()) {
@@ -107,86 +112,101 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavController) {
     val bookData = bookInfo.data?.volumeInfo
     val googleBookId = bookInfo.data?.id
 
-    Card(modifier = Modifier.padding(34.dp),
-        shape = CircleShape, elevation = CardDefaults.cardElevation(4.dp)) {
+    val scrollRemember = rememberScrollState()
 
-        Image(painter = rememberAsyncImagePainter(model = bookData!!.imageLinks.thumbnail),
-            contentDescription = "Book Image",
-            modifier = Modifier
-                .width(90.dp)
-                .height(90.dp))
-    }
-
-    Text(text = bookData?.title.toString(),
-        style = MaterialTheme.typography.headlineMedium,
-        overflow = TextOverflow.Ellipsis,
-        maxLines = 8)
-
-    Text(text = "Author: ${bookData?.authors.toString()}")
-
-    Text(text = "Page count: ${bookData?.pageCount.toString()}")
-
-    Text(text = "Categories: ${bookData?.categories.toString()}", maxLines = 3,)
-    Spacer(modifier = Modifier.height(5.dp))
-
-    Text(text = "Language: ${bookData?.language.toString()}")
-    Spacer(modifier = Modifier.height(5.dp))
-
-    val cleanDescription = HtmlCompat.fromHtml(bookData!!.description,
-        HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
-
-    val localDims = LocalContext.current.resources.displayMetrics
-    Surface(modifier = Modifier.height(localDims.heightPixels.dp.times(0.09f))
-        .padding(4.dp),
-        shape = RectangleShape,
-        border = BorderStroke(1.dp, Color.LightGray)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollRemember)
+            .padding(8.dp)
     ) {
+        Card(
+            modifier = Modifier.padding(34.dp),
+            shape = CircleShape, elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+
+            Image(
+                painter = rememberAsyncImagePainter(model = bookData!!.imageLinks.thumbnail),
+                contentDescription = "Book Image",
+                modifier = Modifier
+                    .width(90.dp)
+                    .height(90.dp)
+            )
+        }
+
+        Text(
+            text = bookData?.title.toString(),
+            style = MaterialTheme.typography.headlineMedium,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 8
+        )
+
+        Text(text = "Author: ${bookData?.authors.toString()}")
+
+        Text(text = "Page count: ${bookData?.pageCount.toString()}")
+
+        Text(text = "Categories: ${bookData?.categories.toString()}", maxLines = 3)
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Text(text = "Language: ${bookData?.language.toString()}")
+        Spacer(modifier = Modifier.height(5.dp))
+
+        val cleanDescription = HtmlCompat.fromHtml(
+            bookData!!.description,
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        ).toString()
+
+        val localDims = LocalContext.current.resources.displayMetrics
+        Surface(
+            modifier = Modifier
+                .height(localDims.heightPixels.dp.times(0.09f))
+                .padding(4.dp),
+            shape = RectangleShape,
+            border = BorderStroke(1.dp, Color.LightGray)
+        ) {
 
 
-        LazyColumn(modifier = Modifier.padding(3.dp)) {
-            item {
-                Text(text = cleanDescription)
+            LazyColumn(modifier = Modifier.padding(3.dp)) {
+                item {
+                    Text(text = cleanDescription)
+                }
+            }
+
+        }
+
+        Row(
+            modifier = Modifier.padding(top = 6.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            RoundedButton(label = "Save") {
+                val book = MBook(
+                    title = bookData.title,
+                    authors = bookData.authors.toString(),
+                    description = bookData.description,
+                    categories = bookData.categories.toString(),
+                    notes = "",
+                    photoUrl = bookData.imageLinks.thumbnail,
+                    publishedDate = bookData.publishedDate,
+                    pageCount = bookData.pageCount.toString(),
+                    rating = 0.0,
+                    googleBookId = googleBookId,
+                    userId = FirebaseAuth.getInstance().currentUser?.uid.toString(),
+                )
+                saveBookToFirebase(book, navController)
+            }
+
+            Spacer(modifier = Modifier.width(25.dp))
+            RoundedButton(label = "Cancel") {
+                navController.popBackStack()
             }
         }
 
+
     }
-
-    Row(modifier = Modifier.padding(top = 6.dp),
-        horizontalArrangement = Arrangement.SpaceAround) {
-        RoundedButton(label = "Save") {
-            val book = MBook(
-                title = bookData.title,
-                authors = bookData.authors.toString(),
-                description = bookData.description,
-                categories = bookData.categories.toString(),
-                notes = "",
-                photoUrl = bookData.imageLinks.thumbnail,
-                publishedDate = bookData.publishedDate,
-                pageCount = bookData.pageCount.toString(),
-                rating = 0.0,
-                googleBookId = googleBookId,
-                userId = FirebaseAuth.getInstance().currentUser?.uid.toString(),
-            )
-            saveBookToFirebase(book, navController)
-        }
-
-        Spacer(modifier = Modifier.width(25.dp))
-        RoundedButton(label = "Cancel") {
-            navController.popBackStack()
-        }
-    }
-
-
-
-
-
-
-
-
 
 
 }
-
+// this function for saving to firebase
 fun saveBookToFirebase(book: MBook, navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val dbCollection = db.collection("books")
@@ -199,7 +219,7 @@ fun saveBookToFirebase(book: MBook, navController: NavController) {
                     .update(hashMapOf("id" to docId) as Map<String, Any>)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                         navController.popBackStack()
+                            navController.popBackStack()
                         }
                     }
             }

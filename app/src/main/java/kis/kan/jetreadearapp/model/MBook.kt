@@ -9,6 +9,7 @@ data class MBook(
     var title: String? = null,
     var authors: String? = null,
     var notes: String? = null,
+    // this name put and in firebase store
     @get:PropertyName("book_photo_url")
     @set:PropertyName("book_photo_url")
     var photoUrl: String? = null,
@@ -24,12 +25,12 @@ data class MBook(
     @set:PropertyName("page_count")
     var pageCount: String? = null,
 
-    @get:PropertyName("start_reading")
-    @set:PropertyName("start_reading")
+    @get:PropertyName("started_reading_at")
+    @set:PropertyName("started_reading_at")
     var startedReading: Timestamp? = null,
 
-    @get:PropertyName("finish_reading")
-    @set:PropertyName("finish_reading")
+    @get:PropertyName("finished_reading_at")
+    @set:PropertyName("finished_reading_at")
     var finishReading: Timestamp? = null,
 
     @get:PropertyName("user_id")

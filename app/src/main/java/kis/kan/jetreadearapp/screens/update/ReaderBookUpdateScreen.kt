@@ -1,6 +1,8 @@
 package kis.kan.jetreadearapp.screens.update
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -34,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,13 +48,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import kis.kan.jetreadearapp.R
 import kis.kan.jetreadearapp.components.InputField
 import kis.kan.jetreadearapp.components.RatingBarOwn
 import kis.kan.jetreadearapp.components.ReaderAppBar
 import kis.kan.jetreadearapp.components.RoundedButton
 import kis.kan.jetreadearapp.data.DataOrException
 import kis.kan.jetreadearapp.model.MBook
+import kis.kan.jetreadearapp.navigation.ReaderScreens
 import kis.kan.jetreadearapp.screens.home.HomeScreenViewModel
+import kis.kan.jetreadearapp.utils.formatData
+
+
+private val TAG = "ReaderBookUpdateScreenTAG"
 
 @Composable
 fun BookUpdateScreen(
@@ -70,6 +83,8 @@ fun BookUpdateScreen(
     }
     ) { padd ->
         padd
+
+
         val bookInfo = produceState<DataOrException<List<MBook>,
                 Boolean,
                 Exception
@@ -90,12 +105,19 @@ fun BookUpdateScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Log.d("INFO", "BookUpdateInfo ${viewModelThis.data.value.data.toString()}")
+                Log.d(
+                    "bookTaGupdatebook",
+                    "BookUpdateInfo ${viewModelThis.data.value.data.toString()}"
+                )
                 if (bookInfo.loading == true) {
                     LinearProgressIndicator()
                     bookInfo.loading = false
                 } else {
-                    Text(text = viewModelThis.data.value.data?.get(0)?.title.toString())
+                    if (viewModelThis!!.data!!.value!!.data!!.isNotEmpty()) {
+
+                        Text(text = viewModelThis!!.data!!.value!!.data!!.get(0)!!.title!!.toString())
+                    }
+
 
                     Surface(
                         modifier = Modifier
@@ -104,11 +126,14 @@ fun BookUpdateScreen(
                         shape = CircleShape,
                         shadowElevation = 4.dp,
                     ) {
-                        ShowBookUpdate(bookInfo = viewModelThis.data.value, bookItemId = bookItemId)
+                        ShowBookUpdate(
+                            bookInfo = viewModelThis!!.data!!.value,
+                            bookItemId = bookItemId
+                        )
 
                     }
                     // get first book and check if this book right
-                    ShowSimpleForm(book = viewModelThis.data.value.data?.first { mBook ->
+                    ShowSimpleForm(book = viewModelThis!!.data!!.value!!.data?.first { mBook ->
                         mBook.googleBookId == bookItemId
                     }!!, navController)
 
@@ -122,9 +147,16 @@ fun BookUpdateScreen(
 
 }
 
+fun showToast(context: Context, msg: String) {
+    Toast.makeText(context, msg, Toast.LENGTH_LONG)
+        .show()
+}
+
 // this is get book and show it
 @Composable
 fun ShowSimpleForm(book: MBook, navController: NavHostController) {
+
+    val context = LocalContext.current
 
     val notesText = remember {
         mutableStateOf("")
@@ -173,7 +205,8 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                     )
                 }
             } else {
-                Text("Started on: ${book.startedReading}")
+
+                Text("Started on: ${formatData(book?.startedReading!!)}}")
             }
         }
 
@@ -192,6 +225,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
 
             } else {
                 Text(text = "Finished on: ${book.finishReading}")
+
             }
         }
 
@@ -206,6 +240,8 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
             ratingVal.value = rating
         }
     }
+
+    Log.d(TAG, "current book: ${book.title}")
 
     Spacer(modifier = Modifier.padding(15.dp))
 
@@ -226,7 +262,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
 
     val bookToUpdate = hashMapOf(
         "finished_reading_at" to isFinishedTimeStamp,
-        "started_reading at" to  isStartedReading,
+        "started_reading_at" to isStartedTimeStamp,
         "rating" to ratingVal.value,
         "notes" to notesText.value,
     ).toMap()
@@ -236,15 +272,66 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
         RoundedButton(
             label = "Update"
         ) {
+// if only book be refactoring or change information we update in firebase
+            if (bookUpdate) {
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .update(bookToUpdate)
+
+                    .addOnCompleteListener { task ->
+                        showToast(context, "Book updated successfully.")
+                        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                    }
+
+                    .addOnFailureListener { eror ->
+                        Log.d("jqoeir", "this is error ${eror.message}}")
+                    }
+
+
+            }
 
 
         }
 
         Spacer(modifier = Modifier.width(100.dp))
 
+        val openDialog = remember {
+            mutableStateOf(false)
+        }
+
+        if (openDialog.value) {
+            ShowAlertDialog(
+                message = stringResource(id = R.string.sure) +
+                        "\n" +
+                        stringResource(id = R.string.action),
+                openDialog = openDialog,
+            ) {
+
+                // this init onYesPressed -> if we press yes
+
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .delete()
+                    .addOnCompleteListener {
+
+                        if (it.isSuccessful) {
+                            openDialog.value = false
+                            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                        }
+
+                    }
+
+            }
+
+        }
+
+
         RoundedButton(
             "Delete"
         ) {
+            openDialog.value = true
 
         }
 
@@ -252,6 +339,46 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
     }
 
 
+}
+
+// this alert for deleting ask
+@Composable
+fun ShowAlertDialog(
+    message: String,
+    openDialog: MutableState<Boolean>,
+    onYesPressed: () -> Unit
+) {
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = { Text(text = "Delete") },
+            text = { Text(text = message) },
+
+            confirmButton = {
+                TextButton(onClick = {
+                    onYesPressed()
+                }) {
+                    Text("Yes")
+
+                }
+
+            },
+
+            dismissButton = {
+                TextButton(onClick = {
+                    openDialog.value = false
+                }) {
+                    Text("No")
+
+                }
+
+            },
+
+            )
+    }
 }
 
 @Composable
